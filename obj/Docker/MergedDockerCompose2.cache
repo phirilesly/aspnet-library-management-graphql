@@ -1,0 +1,109 @@
+services:
+  booksdb:
+    container_name: booksdb
+    image: mongo
+    ports:
+    - published: 27015
+      target: 27017
+    restart: always
+    volumes:
+    - mongo_data:/data/booksdb:rw
+  demographql.api:
+    build:
+      context: C:\Users\Dell\Documents\backend\github\aspnet-library-management-graphql
+      dockerfile: Services/BookDetails/DemoGraphQL.API/Dockerfile
+      labels:
+        com.microsoft.created-by: visual-studio
+        com.microsoft.visual-studio.project-name: DemoGraphQL.API
+      target: base
+    container_name: DemoGraphQL.API
+    depends_on:
+      booksdb:
+        condition: service_started
+    entrypoint: tail -f /dev/null
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS: "true"
+      AppSettings:MongoServerName: mongodb://booksdb:27017
+      DOTNET_USE_POLLING_FILE_WATCHER: '1'
+      NUGET_FALLBACK_PACKAGES: ''
+    image: demographqlapi:dev
+    labels:
+      com.microsoft.visualstudio.debuggee.arguments: ' --additionalProbingPath /root/.nuget/packages  "/app/bin/Debug/net5.0/DemoGraphQL.API.dll"'
+      com.microsoft.visualstudio.debuggee.killprogram: /bin/sh -c "if PID=$$(pidof
+        dotnet); then kill $$PID; fi"
+      com.microsoft.visualstudio.debuggee.program: dotnet
+      com.microsoft.visualstudio.debuggee.workingdirectory: /app
+    ports:
+    - published: 5005
+      target: 80
+    tty: true
+    volumes:
+    - C:\Users\Dell\Documents\backend\github\aspnet-library-management-graphql\Services\BookDetails\DemoGraphQL.API:/app:rw
+    - C:\Users\Dell\vsdbg\vs2017u5:/remote_debugger:rw
+    - C:\Users\Dell\AppData\Roaming\ASP.NET\Https:/root/.aspnet/https:ro
+    - C:\Users\Dell\AppData\Roaming\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro
+    - C:\Users\Dell\.nuget\packages:/root/.nuget/packages:ro
+    - C:\Users\Dell\Documents\backend\github\aspnet-library-management-graphql:/src:rw
+  demographqltest.api:
+    build:
+      context: C:\Users\Dell\Documents\backend\github\aspnet-library-management-graphql
+      dockerfile: Services/LoanDetails/DemoGraphQLTest.API/Dockerfile
+      labels:
+        com.microsoft.created-by: visual-studio
+        com.microsoft.visual-studio.project-name: DemoGraphQLTest.API
+      target: base
+    container_name: DemoGraphQLTest.API
+    depends_on:
+      loansdb:
+        condition: service_started
+    entrypoint: tail -f /dev/null
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS: "true"
+      AppSettings:MongoServerName: mongodb://loansdb:27017
+      DOTNET_USE_POLLING_FILE_WATCHER: '1'
+      NUGET_FALLBACK_PACKAGES: ''
+    image: demographqltestapi:dev
+    labels:
+      com.microsoft.visualstudio.debuggee.arguments: ' --additionalProbingPath /root/.nuget/packages  "/app/bin/Debug/net5.0/DemoGraphQLTest.API.dll"'
+      com.microsoft.visualstudio.debuggee.killprogram: /bin/sh -c "if PID=$$(pidof
+        dotnet); then kill $$PID; fi"
+      com.microsoft.visualstudio.debuggee.program: dotnet
+      com.microsoft.visualstudio.debuggee.workingdirectory: /app
+    ports:
+    - published: 5006
+      target: 80
+    tty: true
+    volumes:
+    - C:\Users\Dell\Documents\backend\github\aspnet-library-management-graphql\Services\LoanDetails\DemoGraphQLTest.API:/app:rw
+    - C:\Users\Dell\vsdbg\vs2017u5:/remote_debugger:rw
+    - C:\Users\Dell\AppData\Roaming\ASP.NET\Https:/root/.aspnet/https:ro
+    - C:\Users\Dell\AppData\Roaming\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro
+    - C:\Users\Dell\.nuget\packages:/root/.nuget/packages:ro
+    - C:\Users\Dell\Documents\backend\github\aspnet-library-management-graphql:/src:rw
+  loansdb:
+    container_name: loansdb
+    image: mongo
+    ports:
+    - published: 27016
+      target: 27017
+    restart: always
+    volumes:
+    - mongo_data:/data/loansdb:rw
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce
+    ports:
+    - published: 8080
+      target: 8000
+    - published: 9000
+      target: 9000
+    restart: always
+    volumes:
+    - portainer_data:/data:rw
+    - /var/run/docker.sock:/var/run/docker.sock:rw
+version: '3.4'
+volumes:
+  mongo_data: {}
+  portainer_data: {}
